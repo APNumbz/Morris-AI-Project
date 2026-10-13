@@ -2,7 +2,6 @@
 # python MiniMaxOpening.py inputBoard outputBoard "seach depth"
 # python MiniMaxOpening.py board1.txt board2.txt 2
 
-"""
 import sys
 
 inputBoardFile = sys.argv[1]
@@ -11,12 +10,9 @@ searchDepth = sys.argv[3]
 
 with open(inputBoardFile, "r") as f:
     board = f.read().strip()
-"""
 
 numWhitePieces = 9
 numBlackPieces = 9
-
-board = "xxxxxxxxxxxxxxxxxxxxxxx"
 
 # Tracks all node relationships on the board
 neighbors = {
