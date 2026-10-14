@@ -46,25 +46,30 @@ neighbors = {
 }
 
 # Each tuple represents three positions that form a mill
-mills = [
+mills = {
+    # Outer square
     (0, 1, 2),
     (0, 3, 6),
-    (0, 8, 20),
-    (1, 4, 15),
     (2, 5, 7),
-    (2, 13, 22),
-    (3, 4, 5),
-    (3, 9, 17),
-    (5, 12, 19),
-    (6, 10, 14),
+    (6, 7, 11),
+
+    # Middle square
     (8, 9, 10),
+    (8, 17, 20),
+    (10, 14, 17),
     (11, 12, 13),
-    (11, 16, 19),
+
+    # Inner square
     (14, 15, 16),
-    (14, 17, 20),
-    (17, 18, 19),
-    (20, 21, 22)
-]
+    (16, 18, 19),
+    (19, 21, 22),
+    (20, 21, 22),
+
+    # Connecting lines
+    (1, 4, 5),
+    (3, 4, 5),
+    (9, 12, 19),
+    (15, 18, 21) }
 
 def closeMill(position, board):
     piece = board[position]
