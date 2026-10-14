@@ -2,17 +2,8 @@
 # python MiniMaxOpening.py inputBoard outputBoard "seach depth"
 # python MiniMaxOpening.py board1.txt board2.txt 2
 
-import sys
-
-inputBoardFile = sys.argv[1]
-outputBoardFile = sys.argv[2]
-searchDepth = sys.argv[3]
-
-with open(inputBoardFile, "r") as f:
-    board = f.read().strip()
-
-numWhitePieces = 9
-numBlackPieces = 9
+positionsEvaluated = 0
+board = ""
 
 # Tracks all node relationships on the board
 neighbors = {
@@ -40,23 +31,125 @@ neighbors = {
     21: [18, 20, 22],
     22: [13, 19, 21] }
 
+mills = {
+    # Outer square
+    (0, 1, 2),
+    (0, 3, 6),
+    (2, 5, 7),
+    (6, 7, 11),
+
+    # Middle square
+    (8, 9, 10),
+    (8, 17, 20),
+    (10, 14, 17),
+    (11, 12, 13),
+
+    # Inner square
+    (14, 15, 16),
+    (16, 18, 19),
+    (19, 21, 22),
+    (20, 21, 22),
+
+    # Connecting lines
+    (1, 4, 5),
+    (3, 4, 5),
+    (9, 12, 19),
+    (15, 18, 21) }
+
+def closeMill(location, boardPosition):
+    piece = boardPosition[location]
+    if piece == "x":
+        return False
+
+    for mill in mills:
+        if location in mill:
+            if all(boardPosition[pos] == piece for pos in mill):
+                return True
+
+    return False
+
 def GenerateAdd(boardPosition):
-    global board
+    L = []
 
-    if (board[boardPosition] == "x"):
-        board = board[:boardPosition] + "W" + board[boardPosition + 1:]
-    print(board)
+    for location in range(len(boardPosition)):
+        if boardPosition[location] == "x":
+            newBoard = (boardPosition[:location] + "W" + boardPosition[location + 1:])
+
+            if closeMill(location, newBoard):
+                GenerateRemove(newBoard, L)
+            else:
+                L.append(newBoard)
+    return L
+
+def GenerateRemove(boardPosition, L):
+    originalLength = len(L)
+    for location in range(len(boardPosition)):
+        if boardPosition[location] == "B":
+            if not closeMill(location, boardPosition):
+                newBoard = (boardPosition[:location] + "x" + boardPosition[location + 1:])
+                L.append(newBoard)
+
+    if len(L) == originalLength:
+        for location in range(len(boardPosition)):
+            if boardPosition[location] == "B":
+                newBoard = (boardPosition[:location] + "x" + boardPosition[location + 1:])
+                L.append(newBoard)
     return
 
-def GenerateHopping():
-    return
+def staticEstimation(board):
+    return (board.count("W") - board.count("B"))
 
-def GenerateRemove(boardPosition):
-    global board
+def MiniMaxOpening(boardPosition, depth):
+    global positionsEvaluated
 
-    if (board[boardPosition] == "W"):
-        board = board[:boardPosition] + "x" + board[boardPosition + 1:]
-    return
+    if depth == 0:
+        positionsEvaluated += 1
+        return staticEstimation(boardPosition), boardPosition
 
-def staticEstimation():
-    return (numWhitePieces - numBlackPieces)
+    moves = GenerateAdd(boardPosition)
+
+    if not moves:
+        positionsEvaluated += 1
+        return staticEstimation(boardPosition), boardPosition
+
+    bestEstimate = float("-inf")
+    bestBoard = boardPosition
+
+    for move in moves:
+        estimate, _ = MiniMaxOpening(move, depth - 1)
+
+        if estimate > bestEstimate:
+            bestEstimate = estimate
+            bestBoard = move
+
+    return bestEstimate, bestBoard
+
+def main():
+    global board, positionsEvaluated
+
+    import sys
+
+    if (len(sys.argv) != 4):
+        print("python MiniMaxOpening.py inputBoard outputBoard searchDepth")
+        return 1
+    
+    inputBoardFile = sys.argv[1]
+    outputBoardFile = sys.argv[2]
+    searchDepth = int(sys.argv[3])
+
+    with open(inputBoardFile, "r") as f:
+        board = f.read().strip()
+
+    estimate, bestBoard = MiniMaxOpening(board, searchDepth)
+
+    print("Board Position:", bestBoard)
+    print("Positions evaluated by static estimation:", positionsEvaluated)
+    print("MINIMAX estimate", estimate)
+
+    with open(outputBoardFile, "w") as f:
+        f.write(bestBoard + "\n")
+
+    return 0
+
+if __name__ == "__main__":
+    raise SystemExit(main())
