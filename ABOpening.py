@@ -133,7 +133,7 @@ def main():
     with open(inputBoardFile, "r") as f:
         board = f.read().strip()
 
-    estimate, bestBoard = ABOpeningpening(board, searchDepth)
+    estimate, bestBoard = ABOpening(board, searchDepth)
 
     print("Board Position:", bestBoard)
     print("Positions evaluated by static estimation:", positionsEvaluated)
