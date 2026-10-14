@@ -49,27 +49,35 @@ neighbors = {
 mills = {
     # Outer square
     (0, 1, 2),
-    (0, 3, 6),
-    (2, 5, 7),
-    (6, 7, 11),
-
-    # Middle square
-    (8, 9, 10),
-    (8, 17, 20),
-    (10, 14, 17),
-    (11, 12, 13),
-
-    # Inner square
-    (14, 15, 16),
-    (16, 18, 19),
-    (19, 21, 22),
+    (0, 8, 20),
+    (2, 13, 22),
     (20, 21, 22),
 
-    # Connecting lines
-    (1, 4, 5),
+    # Middle square
     (3, 4, 5),
-    (9, 12, 19),
-    (15, 18, 21) }
+    (3, 9, 17),
+    (5, 12, 19),
+    (17, 18, 19),
+
+    # Inner square
+    (6, 10, 14),
+    (7, 11, 16),
+    (14, 15, 16),
+
+    # Diagonal connecting lines
+    (0, 3, 6),
+    (2, 5, 7),
+    (20, 17, 14),
+    (22, 19, 16),
+
+    # Horizontal connecting lines
+    (8, 9, 10),
+    (11, 12, 13),
+
+    # Vertical connecting lines
+    (21, 18, 15)
+}
+    
 
 def closeMill(position, board):
     piece = board[position]
