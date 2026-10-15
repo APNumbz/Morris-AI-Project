@@ -8,7 +8,7 @@ MILL_LINES = [
     [0, 1, 2], [0, 8, 20], [2, 13, 22], [20, 21, 22],
     [3, 4, 5], [3, 9, 17], [5, 12, 19], [17, 18, 19],
     [6, 10, 14], [7, 11, 16], [14, 15, 16],
-    [1, 4, 15], [8, 9, 10], [11, 12, 13], [15, 18, 21],
+    [8, 9, 10], [11, 12, 13], [15, 18, 21],
     [0, 3, 6], [2, 5, 7], [20, 17, 14], [22, 19, 16]
 ]
 
@@ -38,11 +38,7 @@ def generate_remove(board, L):
                 L.append("".join(b_copy))
                 
     if not found_isolated:
-        for i in range(len(b_list)):
-            if b_list[i] == 'B':
-                b_copy = list(b_list)
-                b_copy[i] = 'x'
-                L.append("".join(b_copy))
+            L.append(board)
 
 def generate_add(board):
     L = []
