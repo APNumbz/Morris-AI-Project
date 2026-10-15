@@ -116,6 +116,8 @@ def alpha_beta_opening(board, depth, alpha, beta, is_white_turn):
         best_val = float('-inf')
         best_board = None
         successors = generate_moves_opening_white(board)
+        if not successors:
+            return static_estimation_opening(board), board
         for succ in successors:
             val, _ = alpha_beta_opening(succ, depth - 1, alpha, beta, False)
             if val > best_val:
@@ -129,6 +131,8 @@ def alpha_beta_opening(board, depth, alpha, beta, is_white_turn):
         best_val = float('inf')
         best_board = None
         successors = generate_moves_opening_black(board)
+        if not successors:
+            return static_estimation_opening(board), board
         for succ in successors:
             val, _ = alpha_beta_opening(succ, depth - 1, alpha, beta, True)
             if val < best_val:

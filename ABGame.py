@@ -83,11 +83,7 @@ def generate_remove(board, L):
                 L.append("".join(b_copy))
                 
     if not found_isolated:
-        for i in range(len(b_list)):
-            if b_list[i] == 'B':
-                b_copy = list(b_list)
-                b_copy[i] = 'x'
-                L.append("".join(b_copy))
+        L.append(board)
 
 def generate_move(board):
     L = []
