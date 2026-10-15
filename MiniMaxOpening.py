@@ -63,7 +63,8 @@ def generate_remove(board, L):
                 b_copy[i] = 'x'
                 L.append("".join(b_copy))
                 
-    # If no black piece can be removed, keep the board unchanged    if not found_isolated:
+    # If no black piece can be removed, keep the board unchanged    
+    if not found_isolated:
         L.append(board)
 
 def generate_add(board):
