@@ -248,14 +248,25 @@ def alpha_beta(board, depth, alpha, beta, is_white_turn, phase):
 
 def detect_phase(board):
     """
-    Detects whether the game is in opening or midgame/endgame.
-    Opening has at most 18 total placements.
+    Fallback phase detector when phase is not explicitly passed via CLI.
+    In the opening, each side places up to 9 pieces (max 18 placements).
+    If empty spots are low, or if either side has placed 9 pieces,
+    it transitions to midgame.
     """
-    total_pieces = board.count('W') + board.count('B')
-    # If the board has fewer than 18 pieces and looks like an early setup, it is opening.
-    # Note: If captures happened during the opening, total pieces can be < 18.
-    # In official matches, teams can also specify phase or track move numbers.
-    return 'midgame' if total_pieces >= 18 else 'opening'
+    w_count = board.count('W')
+    b_count = board.count('B')
+    empty_spots = board.count('x')
+
+    # If 5 or fewer empty spots remain, at least 18 placements have occurred (23 - 5 = 18)
+    if empty_spots <= 5:
+        return 'midgame'
+
+    # If either player has 9 pieces on the board, their opening placements are finished
+    if w_count >= 9 or b_count >= 9:
+        return 'midgame'
+
+    # Fallback default: opening for early sparse boards
+    return 'opening'
 
 def main():
     if len(sys.argv) < 4:
