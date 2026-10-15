@@ -49,7 +49,7 @@ def closeMill(j, b):
 def generate_remove(board, L):
     """
     Removes one black piece not in a mill.
-    If all black pieces are in mills, any black piece can be removed.
+    If no eligible piece can be removed, keeps the board unchanged.
     """
     b_list = list(board)
     found_isolated = False
@@ -63,8 +63,7 @@ def generate_remove(board, L):
                 b_copy[i] = 'x'
                 L.append("".join(b_copy))
                 
-    # If every black piece is part of a mill, any can be removed
-    if not found_isolated:
+    # If no black piece can be removed, keep the board unchanged    if not found_isolated:
         L.append(board)
 
 def generate_add(board):

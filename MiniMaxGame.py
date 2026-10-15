@@ -73,7 +73,7 @@ def closeMill(j, b):
 # -------------------------------------------------------------
 
 def generate_remove(board, L):
-    """Removes one black piece not in a mill; if none, any black piece."""
+    """Removes one black piece not in a mill; otherwise keeps the board unchanged."""    
     b_list = list(board)
     found_isolated = False
     
@@ -187,7 +187,7 @@ def minimax_game(board, depth, is_white_turn):
         best_val = float('-inf')
         best_board = None
         successors = generate_moves_midgame_endgame_white(board)
-        if not successors:  # White has no legal moves -> loss
+        if not successors:  # White has no legal moves
             return static_estimation_game(board), board
         for succ in successors:
             val, _ = minimax_game(succ, depth - 1, False)
