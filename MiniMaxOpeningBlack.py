@@ -136,6 +136,8 @@ def main():
     best_estimate, best_move_inverted = minimax_opening(inverted_initial, depth, is_white_turn=True)
     
     # Invert back to get the actual board representation
+    if best_move_inverted is None:
+        best_move_inverted = inverted_initial
     best_move = invert_board(best_move_inverted)
     
     with open(output_file, 'w') as f:
