@@ -105,7 +105,7 @@ def GenerateRemove(boardPosition, L):
 def staticEstimation(board):
     return (board.count("W") - board.count("B"))
 
-def ABOpening(boardPosition, depth):
+def ABOpening(boardPosition, depth, alpha = float("-inf"), beta = float("inf")):
     global positionsEvaluated
 
     if depth == 0:
@@ -113,9 +113,27 @@ def ABOpening(boardPosition, depth):
         return staticEstimation(boardPosition), boardPosition
 
     moves = GenerateAdd(boardPosition)
-    # TODO
-    #return bestEstimate, bestBoard
-    return
+
+    if not moves:
+        positionsEvaluated += 1
+        return staticEstimation(boardPosition), boardPosition
+
+    bestEstimate = float("-inf")
+    bestBoard = boardPosition
+
+    for move in moves:
+        estimate, _ = ABOpening(move, depth - 1, alpha, beta)
+
+        if estimate > bestEstimate:
+            bestEstimate = estimate
+            bestBoard = move
+
+        alpha = max(alpha, bestEstimate)
+
+        if alpha >= beta:
+            break
+
+    return bestEstimate, bestBoard
 
 def main():
     global board, positionsEvaluated
