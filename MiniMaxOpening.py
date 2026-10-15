@@ -17,12 +17,10 @@ MILL_LINES = [
     [5, 12, 19],  # f1 - f3 - f5
     [17, 18, 19], # b5 - d5 - f5
     # Inner square lines
-    [6, 7],       # Note: c2 - e2 line depends on layout
     [6, 10, 14],  # c2 - c3 - c4
     [7, 11, 16],  # e2 - e3 - e4
     [14, 15, 16], # c4 - d4 - e4
     # Cross connectors
-    [1, 4, 15],   # d0 - d1 - d4
     [8, 9, 10],   # a3 - b3 - c3
     [11, 12, 13], # e3 - f3 - g3
     [15, 18, 21], # d4 - d5 - d6
@@ -67,11 +65,7 @@ def generate_remove(board, L):
                 
     # If every black piece is part of a mill, any can be removed
     if not found_isolated:
-        for i in range(len(b_list)):
-            if b_list[i] == 'B':
-                b_copy = list(b_list)
-                b_copy[i] = 'x'
-                L.append("".join(b_copy))
+        L.append(board)
 
 def generate_add(board):
     """Generates all legal board positions for White in the opening."""
@@ -146,6 +140,8 @@ def minimax_opening(board, depth, is_white_turn):
         best_val = float('-inf')
         best_board = None
         successors = generate_moves_opening_white(board)
+        if not successors:
+            return static_estimation_opening(board), board
         for succ in successors:
             val, _ = minimax_opening(succ, depth - 1, False)
             if val > best_val:
@@ -156,6 +152,8 @@ def minimax_opening(board, depth, is_white_turn):
         best_val = float('inf')
         best_board = None
         successors = generate_moves_opening_black(board)
+        if not successors:
+            return static_estimation_opening(board), board
         for succ in successors:
             val, _ = minimax_opening(succ, depth - 1, True)
             if val < best_val:
