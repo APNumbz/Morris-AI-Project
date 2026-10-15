@@ -91,6 +91,9 @@ def minimax_opening(board, depth, is_white_turn):
         best_val = float('-inf')
         best_board = None
         successors = generate_moves_opening_white(board)
+        successors = generate_moves_opening_white(board)
+        if not successors:
+            return static_estimation_opening(board), board
         for succ in successors:
             val, _ = minimax_opening(succ, depth - 1, False)
             if val > best_val:
@@ -101,6 +104,9 @@ def minimax_opening(board, depth, is_white_turn):
         best_val = float('inf')
         best_board = None
         successors = generate_moves_opening_black(board)
+        successors = generate_moves_opening_black(board)
+        if not successors:
+            return static_estimation_opening(board), board
         for succ in successors:
             val, _ = minimax_opening(succ, depth - 1, True)
             if val < best_val:
