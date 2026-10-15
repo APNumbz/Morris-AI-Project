@@ -1,0 +1,112 @@
+1. Features Used By The Evaluation Function:
+
+A. Opening Phase (MiniMaxOpeningImproved.py):
+   1. Material Difference (numWhitePieces - numBlackPieces)
+   2. Completed Mills Difference (whiteMills - blackMills)
+   3. Potential Mills / 2-in-a-Row Threats (whiteThreats - blackThreats)
+
+B. Midgame / Endgame Phase (MiniMaxGameImproved.py):
+   1. Material Difference (numWhitePieces - numBlackPieces)
+   2. Mobility Difference (numWhiteMoves - numBlackMoves)
+   3. Completed Mills Difference (whiteMills - blackMills)
+   4. 2-in-a-Row Threats (whiteThreats - blackThreats)
+   5. Blocked Opponent Pieces (blockedBlackPieces - blockedWhitePieces)
+
+
+2. Why They Were Selected:
+
+- Material Difference:
+Having more pieces than the opponent is a major advantage in Nine Men's Morris.
+If the opponent is reduced to only two pieces, the game is immediately won.
+- Potential Mills (Threats):
+When two pieces are lined up with an open third spot, there is a chance to complete a mill on the next move.
+This forces the opponent to react and can lead to capturing one of their pieces.
+The original function did not account for these possible mills.
+- Completed Mills:
+Completed mills give us more control over the board and protect pieces since pieces in a mill usually cannot be captured.
+- Mobility Difference:
+Another way to win is by leaving the opponent with no legal moves.
+Because of this, having more available moves while limiting the opponent's movement gives us a stronger position.
+- Blocked Pieces:
+Blocking the opponent's pieces reduces the number of moves they can make and limits their options throughout the game.
+
+
+3. Feature Combinations:
+
+Opening:
+   Evaluation = (100 * MaterialDiff) + (25 * MillsDiff) + (10 * ThreatsDiff)
+
+Midgame/Endgame:
+   Evaluation = (1000 * MaterialDiff) 
+              + (20 * MobilityDiff) 
+              + (50 * MillsDiff) 
+              + (30 * ThreatsDiff) 
+              + (25 * BlockedDiff)
+
+Terminal conditions (<= 2 pieces or 0 legal moves) immediately return +10000 or -10000.
+
+
+4. Why This Evaluation Is Better Than The Original:
+
+The original static estimation from the handout only looked at the number of pieces and the opponent's available moves (1000 * material - blackMoves).
+During the opening phase, it mainly focused on piece count, so most moves that did not immediately capture a piece were treated about the same.
+    
+The improved evaluation considers more of what is happening on the board.
+It rewards moves that create potential mills, blocks the opponent from setting up threats, and limits the movement of their pieces.
+It also looks for opportunities to create multiple threats at once, which can lead to more captures and a stronger position later in the game.
+
+
+5. Example Positions With The Improved Function:
+
+Example 1: Opening Phase
+Input Board: WxxWxxxxxxxxBxxxxxxxxxB
+White has pieces at a0 (0) and b1 (3), while Black has pieces at f3 (12) and g6 (22).
+
+Original Function (MiniMaxOpening.py):
+Selected Board: WxxWWxxxxxxxBxxxxxxxxxB
+Move: White places a piece at index 4 (d1).
+
+Improved Function (MiniMaxOpeningImproved.py):
+Selected Board: WxxWxxWxxxxxBxxxxxxxxxB
+Move: White places a piece at index 6 (c2).
+
+Explanation:
+The original function only looks at the difference between the number of White and Black pieces.
+Since placing a piece in any open spot without getting a capture gives the same score of 3 - 2 = 1,
+the function has no way to tell which position is actually better.
+Because of this, it ends up choosing the first available position, which is index 4.
+
+The improved function recognizes that positions 0, 3, and 6 (a0 - b1 - c2) form a mill line.
+By placing a piece at index 6, White completes the mill and creates an opportunity to capture one of Black's pieces.
+Because the improved evaluation checks for mills and threats, this move receives a better score.
+
+Why the New Move is Preferred:
+The move at c2 is more useful because it completes a mill and gives White a capture.
+Instead of placing a piece in a position that does not create an immediate advantage,
+the improved function chooses a move that strengthens White's position.
+
+
+Example 2: Midgame Phase
+Input Board: WxxxxxxBxxWxxxxBxxxxBxW
+White has pieces at a0 (0), c3 (10), and g6 (22), while Black has pieces at e2 (7), d4 (15), and a6 (20).
+
+Original Function (MiniMaxGame.py):
+Selected Board: xWxxxxxBxxWxxxxBxxxxBxW
+Move: White slides from a0 to d0.
+
+Improved Function (MiniMaxGameImproved.py):
+Selected Board: WxxxxxxBxxxWxxxBxxxxBxW
+Move: White moves a piece toward the center to limit Black's movement.
+
+Explanation:
+The original function mainly looks at the number of pieces and the total number of moves available to Black.
+In this position, moving toward the outside of the board does not do much to limit Black's movement.
+However, because the original evaluation does not consider blocked pieces or White's own mobility, it can still choose this move.
+
+The improved function considers both White and Black's available moves and also rewards positions where Black's pieces are blocked.
+Because of this, it prefers a move that limits Black's options while keeping White in a stronger position.
+
+Why the New Move is Preferred:
+A player can win Nine Men's Morris by leaving the opponent with no legal moves.
+Because of this, limiting Black's movement is more useful than simply moving a piece toward the outside of the board.
+The improved function is able to recognize this and choose a move that puts more pressure on Black.

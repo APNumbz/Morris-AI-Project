@@ -1,161 +1,197 @@
-# MiniMaxOpening.py
-# python MiniMaxOpening.py inputBoard outputBoard "seach depth"
-# python MiniMaxOpening.py board1.txt board2.txt 2
+import sys
 
-positionsEvaluated = 0
-board = ""
+# -------------------------------------------------------------
+# 1. Board Graph & Mill Definitions (Morris Variant Layout)
+# -------------------------------------------------------------
 
-# Tracks all node relationships on the board
-neighbors = {
-    0: [1, 3, 8],
-    1: [0, 2, 4],
-    2: [1, 5, 13],
-    3: [0, 4, 6, 9],
-    4: [1, 3, 5],
-    5: [2, 4, 7, 12],
-    6: [3, 7, 10],
-    7: [5, 6, 11],
-    8: [0, 9, 20],
-    9: [3, 8, 10, 17],
-    10: [6, 9, 14],
-    11: [7, 12, 16],
-    12: [5, 11, 13, 19],
-    13: [2, 12, 22],
-    14: [10, 15, 17],
-    15: [14, 16, 18],
-    16: [11, 15, 19],
-    17: [9, 14, 18, 20],
-    18: [15, 17, 19, 21],
-    19: [12, 16, 18, 22],
-    20: [8, 17, 21],
-    21: [18, 20, 22],
-    22: [13, 19, 21] }
+# All 3-in-a-row mill lines on the 23-node Morris Variant board
+MILL_LINES = [
+    # Outer square lines
+    [0, 1, 2],    # a0 - d0 - g0
+    [0, 8, 20],   # a0 - a3 - a6
+    [2, 13, 22],  # g0 - g3 - g6
+    [20, 21, 22], # a6 - d6 - g6
+    # Middle square lines
+    [3, 4, 5],    # b1 - d1 - f1
+    [3, 9, 17],   # b1 - b3 - b5
+    [5, 12, 19],  # f1 - f3 - f5
+    [17, 18, 19], # b5 - d5 - f5
+    # Inner square lines
+    [6, 7],       # Note: c2 - e2 line depends on layout
+    [6, 10, 14],  # c2 - c3 - c4
+    [7, 11, 16],  # e2 - e3 - e4
+    [14, 15, 16], # c4 - d4 - e4
+    # Cross connectors
+    [1, 4, 15],   # d0 - d1 - d4
+    [8, 9, 10],   # a3 - b3 - c3
+    [11, 12, 13], # e3 - f3 - g3
+    [15, 18, 21], # d4 - d5 - d6
+    # Diagonals / Corner lines
+    [0, 3, 6],    # a0 - b1 - c2
+    [2, 5, 7],    # g0 - f1 - e2
+    [20, 17, 14], # a6 - b5 - c4
+    [22, 19, 16]  # g6 - f5 - e4
+]
 
-mills = {
-    # Outer square
-    (0, 1, 2),
-    (0, 8, 20),
-    (2, 13, 22),
-    (20, 21, 22),
-
-    # Middle square
-    (3, 4, 5),
-    (3, 9, 17),
-    (5, 12, 19),
-    (17, 18, 19),
-
-    # Inner square
-    (6, 10, 14),
-    (7, 11, 16),
-    (14, 15, 16),
-
-    # Diagonal connecting lines
-    (0, 3, 6),
-    (2, 5, 7),
-    (20, 17, 14),
-    (22, 19, 16),
-
-    # Horizontal connecting lines
-    (8, 9, 10),
-    (11, 12, 13),
-
-    # Vertical connecting lines
-    (21, 18, 15) }
-
-def closeMill(location, boardPosition):
-    piece = boardPosition[location]
-    if piece == "x":
+def closeMill(j, b):
+    """Returns True if the piece at index j forms a completed mill."""
+    C = b[j]
+    if C == 'x':
         return False
-
-    for mill in mills:
-        if location in mill:
-            if all(boardPosition[pos] == piece for pos in mill):
+    for line in MILL_LINES:
+        if j in line:
+            if all(b[pos] == C for pos in line):
                 return True
-
     return False
 
-def GenerateAdd(boardPosition):
+# -------------------------------------------------------------
+# 2. Move Generation for Opening
+# -------------------------------------------------------------
+
+def generate_remove(board, L):
+    """
+    Removes one black piece not in a mill.
+    If all black pieces are in mills, any black piece can be removed.
+    """
+    b_list = list(board)
+    found_isolated = False
+    
+    # Try removing an isolated piece first
+    for i in range(len(b_list)):
+        if b_list[i] == 'B':
+            if not closeMill(i, board):
+                found_isolated = True
+                b_copy = list(b_list)
+                b_copy[i] = 'x'
+                L.append("".join(b_copy))
+                
+    # If every black piece is part of a mill, any can be removed
+    if not found_isolated:
+        for i in range(len(b_list)):
+            if b_list[i] == 'B':
+                b_copy = list(b_list)
+                b_copy[i] = 'x'
+                L.append("".join(b_copy))
+
+def generate_add(board):
+    """Generates all legal board positions for White in the opening."""
     L = []
-
-    for location in range(len(boardPosition)):
-        if boardPosition[location] == "x":
-            newBoard = (boardPosition[:location] + "W" + boardPosition[location + 1:])
-
-            if closeMill(location, newBoard):
-                GenerateRemove(newBoard, L)
+    for loc in range(len(board)):
+        if board[loc] == 'x':
+            b = list(board)
+            b[loc] = 'W'
+            b_str = "".join(b)
+            if closeMill(loc, b_str):
+                generate_remove(b_str, L)
             else:
-                L.append(newBoard)
+                L.append(b_str)
     return L
 
-def GenerateRemove(boardPosition, L):
-    originalLength = len(L)
-    for location in range(len(boardPosition)):
-        if boardPosition[location] == "B":
-            if not closeMill(location, boardPosition):
-                newBoard = (boardPosition[:location] + "x" + boardPosition[location + 1:])
-                L.append(newBoard)
+def generate_moves_opening_white(board):
+    return generate_add(board)
 
-    if len(L) == originalLength:
-        for location in range(len(boardPosition)):
-            if boardPosition[location] == "B":
-                newBoard = (boardPosition[:location] + "x" + boardPosition[location + 1:])
-                L.append(newBoard)
-    return
+def generate_moves_opening_black(board):
+    """Invert colors, run White's move generator, and invert back."""
+    # Step 1: Invert colors (W -> B, B -> W)
+    inverted = []
+    for ch in board:
+        if ch == 'W':
+            inverted.append('B')
+        elif ch == 'B':
+            inverted.append('W')
+        else:
+            inverted.append('x')
+    inv_str = "".join(inverted)
+    
+    # Step 2: Generate moves for White
+    moves = generate_add(inv_str)
+    
+    # Step 3: Invert colors back
+    result = []
+    for m in moves:
+        back = []
+        for ch in m:
+            if ch == 'W':
+                back.append('B')
+            elif ch == 'B':
+                back.append('W')
+            else:
+                back.append('x')
+        result.append("".join(back))
+    return result
 
-def staticEstimation(board):
-    return (board.count("W") - board.count("B"))
+# -------------------------------------------------------------
+# 3. Static Estimation & Minimax Search
+# -------------------------------------------------------------
 
-def MiniMaxOpening(boardPosition, depth):
-    global positionsEvaluated
+positions_evaluated = 0
 
+def static_estimation_opening(board):
+    """Static estimation for Opening = numWhitePieces - numBlackPieces."""
+    global positions_evaluated
+    positions_evaluated += 1
+    num_white = board.count('W')
+    num_black = board.count('B')
+    return num_white - num_black
+
+def minimax_opening(board, depth, is_white_turn):
+    """
+    Standard Minimax search.
+    White is maximizing player; Black is minimizing player.
+    """
     if depth == 0:
-        positionsEvaluated += 1
-        return staticEstimation(boardPosition), boardPosition
+        return static_estimation_opening(board), board
+    
+    if is_white_turn:
+        best_val = float('-inf')
+        best_board = None
+        successors = generate_moves_opening_white(board)
+        for succ in successors:
+            val, _ = minimax_opening(succ, depth - 1, False)
+            if val > best_val:
+                best_val = val
+                best_board = succ
+        return best_val, best_board
+    else:
+        best_val = float('inf')
+        best_board = None
+        successors = generate_moves_opening_black(board)
+        for succ in successors:
+            val, _ = minimax_opening(succ, depth - 1, True)
+            if val < best_val:
+                best_val = val
+                best_board = succ
+        return best_val, best_board
 
-    moves = GenerateAdd(boardPosition)
-
-    if not moves:
-        positionsEvaluated += 1
-        return staticEstimation(boardPosition), boardPosition
-
-    bestEstimate = float("-inf")
-    bestBoard = boardPosition
-
-    for move in moves:
-        estimate, _ = MiniMaxOpening(move, depth - 1)
-
-        if estimate > bestEstimate:
-            bestEstimate = estimate
-            bestBoard = move
-
-    return bestEstimate, bestBoard
+# -------------------------------------------------------------
+# 4. Main Program
+# -------------------------------------------------------------
 
 def main():
-    global board, positionsEvaluated
-
-    import sys
-
-    if (len(sys.argv) != 4):
-        print("python MiniMaxOpening.py inputBoard outputBoard searchDepth")
-        return 1
+    if len(sys.argv) != 4:
+        print("Usage: python MiniMaxOpening.py <input_file> <output_file> <depth>")
+        sys.exit(1)
+        
+    input_file = sys.argv[1]
+    output_file = sys.argv[2]
+    depth = int(sys.argv[3])
     
-    inputBoardFile = sys.argv[1]
-    outputBoardFile = sys.argv[2]
-    searchDepth = int(sys.argv[3])
+    with open(input_file, 'r') as f:
+        board_str = f.read().strip()
+        
+    global positions_evaluated
+    positions_evaluated = 0
+    
+    best_estimate, best_move = minimax_opening(board_str, depth, is_white_turn=True)
+    
+    # Write chosen board position to output file
+    with open(output_file, 'w') as f:
+        f.write(best_move + "\n")
+        
+    # Print required output
+    print(f"Board Position: {best_move}")
+    print(f"Positions evaluated by static estimation: {positions_evaluated}")
+    print(f"MINIMAX estimate: {best_estimate}")
 
-    with open(inputBoardFile, "r") as f:
-        board = f.read().strip()
-
-    estimate, bestBoard = MiniMaxOpening(board, searchDepth)
-
-    print("Board Position:", bestBoard)
-    print("Positions evaluated by static estimation:", positionsEvaluated)
-    print("MINIMAX estimate", estimate)
-
-    with open(outputBoardFile, "w") as f:
-        f.write(bestBoard + "\n")
-
-    return 0
-
-if __name__ == "__main__":
-    raise SystemExit(main())
+if __name__ == '__main__':
+    main()
