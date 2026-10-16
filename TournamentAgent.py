@@ -287,6 +287,21 @@ def main():
         phase = "opening" if phase_arg == "opening" else "midgame"
     else:
         phase = detect_phase(board_str)
+
+    # Terminal Game Over Check
+    if phase != 'opening':
+        w_cnt = board_str.count('W')
+        b_cnt = board_str.count('B')
+        if b_cnt <= 2:
+            print("\n" + "=" * 45)
+            print("GAME OVER! WHITE WINS! (Black reduced to 2 pieces)")
+            print("=" * 45 + "\n")
+            sys.exit(0)
+        elif w_cnt <= 2:
+            print("\n" + "=" * 45)
+            print("GAME OVER! BLACK WINS! (White reduced to 2 pieces)")
+            print("=" * 45 + "\n")
+            sys.exit(0)
         
     global positions_evaluated
     positions_evaluated = 0
